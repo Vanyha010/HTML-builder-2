@@ -1,4 +1,4 @@
-const { mkdir, readdir } = require('fs').promises;
+const { mkdir, readdir, unlink } = require('fs').promises;
 const fs = require('fs');
 const path = require('path');
 
@@ -8,6 +8,12 @@ async function copyDir() {
   await mkdir(copyFolder, { recursive: true });
 
   const files = await readdir(initialFolder, { withFileTypes: true });
+
+  const oldFiles = await readdir(copyFolder);
+  for (let file of oldFiles) {
+    await unlink(path.join(copyFolder, file));
+  }
+
   for (let file of files) {
     // Option 1
     // const input = fs.createReadStream(path.resolve(initialFolder, file.name));
