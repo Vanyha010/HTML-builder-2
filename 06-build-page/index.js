@@ -36,13 +36,11 @@ async function bundleHTML() {
 
 async function mergeStyles() {
   const files = await readdir(stylesDir, { withFileTypes: true });
+  const outputStream = fs.createWriteStream(outputStyles);
   files.forEach(async (file) => {
     if (file.name.endsWith('.css')) {
-      const fd = await open(path.join(stylesDir, file.name));
-      const stream = fd.createReadStream();
-      stream.on('data', async (data) => {
-        await appendFile(outputStyles, data);
-      });
+      const inputStream = fs.createReadStream(path.join(stylesDir, file.name));
+      await inputStream.pipe(outputStream);
     }
   });
 }
