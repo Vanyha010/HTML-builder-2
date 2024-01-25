@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const { mkdir, readdir, open, writeFile, appendFile } = require('fs').promises;
+const { mkdir, readdir, open, writeFile } = require('fs').promises;
 
 const componentsDir = path.join(__dirname, 'components');
 const destinaionDir = path.join(__dirname, 'project-dist');
@@ -20,16 +20,20 @@ async function bundleHTML() {
   stream.on('data', async (chunk) => {
     for (let component of components) {
       const componentName = component.split('.')[0];
-      const componentFd = await open(
-        path.join(componentsDir, `${componentName}.html`),
-      );
-      const componentStream = componentFd.createReadStream({
-        encoding: 'utf-8',
-      });
-      componentStream.on('data', (componentCode) => {
-        chunk = chunk.replace(`{{${componentName}}}`, componentCode);
-        writeFile(path.join(destinaionDir, 'index.html'), chunk);
-      });
+      const componentExt = component.split('.')[1];
+
+      if (componentExt === 'html') {
+        const componentFd = await open(
+          path.join(componentsDir, `${componentName}.html`),
+        );
+        const componentStream = componentFd.createReadStream({
+          encoding: 'utf-8',
+        });
+        componentStream.on('data', (componentCode) => {
+          chunk = chunk.replace(`{{${componentName}}}`, componentCode);
+          writeFile(path.join(destinaionDir, 'index.html'), chunk);
+        });
+      }
     }
   });
 }
